@@ -1,0 +1,24 @@
+name: Compilar para Raspberry Pi
+on: [workflow_dispatch] # Se activa manualmente con un botón
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.24' # Versión que piden las librerías
+      
+      - name: Build ARMv7
+        run: |
+          cd cli
+          # Usamos los tags que descubrimos antes para evitar errores
+          GOOS=linux GOARCH=arm GOARM=7 go build -tags psiphontls_not_supported -ldflags="-s -w" -o conduit-rpi .
+          
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: binario-psiphon-rpi
+          path: cli/conduit-rpi
